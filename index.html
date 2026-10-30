@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Поповы из Сасыколей</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=PT+Sans:ital,wght@0,400;0,700;1,400&family=PT+Mono&display=swap">
+<style>
+/* Layout: ledger page — header, then outline trees with ruled connector lines, revision table, method & sources */
+:root{
+  --paper:#eef1ee; --sheet:#f8faf8; --ink:#1d2733; --muted:#5d6b73; --rule:#c9d3cf;
+  --accent:#2b5d7a; --accent-soft:#dbe7ee;
+  --line:#a8361c; --line-bg:#f7e4dc;
+  --ok:#2f6b3f; --ok-bg:#dcebdf; --hyp:#8a5a00; --hyp-bg:#f6e8c8; --known:#44505a; --known-bg:#e3e8ea;
+  --f-display:"Alegreya", "Georgia", serif; --f-body:"PT Sans", "Helvetica Neue", Arial, sans-serif; --f-mono:"PT Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#141a1f; --sheet:#1b2329; --ink:#e3e9ec; --muted:#9aa8b0; --rule:#34424b;
+  --accent:#8fc0dc; --accent-soft:#223543; --line:#f08f70; --line-bg:#3b2620;
+  --ok:#9fd2ab; --ok-bg:#1f3526; --hyp:#e9c47a; --hyp-bg:#3a2f18; --known:#c3ccd2; --known-bg:#2a333a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#141a1f; --sheet:#1b2329; --ink:#e3e9ec; --muted:#9aa8b0; --rule:#34424b;
+  --accent:#8fc0dc; --accent-soft:#223543; --line:#f08f70; --line-bg:#3b2620;
+  --ok:#9fd2ab; --ok-bg:#1f3526; --hyp:#e9c47a; --hyp-bg:#3a2f18; --known:#c3ccd2; --known-bg:#2a333a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:16px/1.5 var(--f-body);padding-inline:16px;padding-block:0 48px;margin:0}
+.wrap{max-width:1080px;margin:0 auto}
+header{padding-block:40px 28px;border-bottom:2px solid var(--ink);display:grid;gap:18px}
+.eyebrow{font:13px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+h1{font:700 clamp(34px,6vw,58px)/1.05 var(--f-display);margin:0;text-wrap:balance}
+.lede{max-width:64ch;margin:0;font-size:17px}
+.meta{font:13px var(--f-mono);color:var(--muted)}
+.meta a{color:var(--accent)}
+.stats{display:flex;flex-wrap:wrap;gap:8px 28px;font:14px var(--f-mono);color:var(--muted)}
+.stats b{color:var(--ink);font-weight:400;font-size:20px;margin-right:6px}
+section{padding-block:28px 8px}
+h2{font:700 26px/1.2 var(--f-display);margin:0 0 12px}
+h3.tt{font:700 19px/1.2 var(--f-display);margin:22px 0 8px}
+p.tn{margin:-2px 0 10px;max-width:70ch;color:var(--muted,#6b6158);font-size:14.5px}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.legend{display:flex;flex-wrap:wrap;gap:8px}
+.pill{display:inline-block;font:12px/1 var(--f-mono);padding:5px 8px;border-radius:3px;white-space:nowrap;letter-spacing:.02em}
+.p-hyp{background:var(--hyp-bg);color:var(--hyp)}
+.p-known{background:var(--known-bg);color:var(--known)}
+.p-line{background:var(--line);color:#fff}
+.tools{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+button,input{font:14px var(--f-body);color:var(--ink)}
+button{background:var(--sheet);border:1px solid var(--rule);padding:6px 12px;border-radius:3px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.ln{border-color:var(--line);color:var(--line)}
+button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input{background:var(--sheet);border:1px solid var(--rule);padding:6px 10px;border-radius:3px;min-width:0;width:200px}
+.treebox{background:var(--sheet);border:1px solid var(--rule);padding:18px 14px 18px 10px;overflow-x:auto}
+ul.tree,ul.tree ul{list-style:none;margin:0;padding:0}
+ul.tree ul{margin-left:18px;padding-left:16px;border-left:1px solid var(--rule)}
+ul.tree li{position:relative;padding-top:8px}
+ul.tree ul>li::before{content:"";position:absolute;left:-16px;top:26px;width:14px;border-top:1px solid var(--rule)}
+ul.tree ul>li.ln::before{border-top:3px solid var(--line);top:25px}
+/* Сплошная красная линия от предка к потомку: рельс от верха списка до плашки нашей линии */
+ul.tree ul>li:has(~li.ln)::after,ul.tree ul>li.ln::after{content:"";position:absolute;left:-17px;top:0;border-left:3px solid var(--line)}
+ul.tree ul>li:has(~li.ln)::after{bottom:0}
+ul.tree ul>li.ln::after{height:28px}
+details>summary{list-style:none;cursor:pointer}
+details>summary::-webkit-details-marker{display:none}
+.node{display:inline-grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:baseline;padding:6px 10px 7px;border:1px solid transparent;border-radius:4px;max-width:100%}
+summary .node{border-color:var(--rule);background:var(--paper)}
+li.ln>.node,li.ln>details>summary .node{background:var(--line-bg);border-color:var(--line);border-left-width:4px}
+li.ln>.node .nm,li.ln>details>summary .node .nm{color:var(--line)}
+li.target>.node{box-shadow:0 0 0 3px var(--line-bg),0 0 0 4px var(--line)}
+.tw{font:12px var(--f-mono);color:var(--muted);width:12px;display:inline-block}
+details[open]>summary .tw::before{content:"−"} details:not([open])>summary .tw::before{content:"+"}
+.leaf .tw::before{content:"·"}
+.nm{font-weight:700}
+.gen-1 .nm,.gen-2 .nm,.gen-3 .nm,.gen-4 .nm{font-family:var(--f-display);font-size:18px;font-weight:700}
+.grp .nm{font-weight:400;color:var(--muted);font-style:italic}
+.yrs{font:13px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums;margin-left:6px}
+.info{grid-column:2;font-size:14px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.info .sp{color:var(--ink)}
+.note{grid-column:2;font-size:14px;max-width:70ch}
+.src{grid-column:2;font:12px var(--f-mono);display:flex;flex-wrap:wrap;gap:4px 12px}
+.src a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-soft)}
+.src a:hover{border-bottom-color:var(--accent)}
+details.refs{grid-column:2}
+details.refs>summary{font:12px var(--f-mono);color:var(--accent);cursor:pointer;list-style:none;padding:2px 0}
+details.refs>summary::before{content:"▸ "}details.refs[open]>summary::before{content:"▾ "}
+ol.facts{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:6px;max-width:74ch}
+ol.facts li{padding:0;font-size:14px}
+ol.facts .fy{font:700 12px/1 var(--f-body);color:var(--ink);background:var(--rule);border-radius:3px;padding:3px 6px;margin-right:8px;vertical-align:1px;font-variant-numeric:tabular-nums}
+ol.facts .src{margin-top:2px}
+ol.facts b{font-weight:700}
+.kinp{display:inline-block;font:700 11.5px/1.35 var(--f-body);color:var(--line);background:var(--line-bg);border:1px solid var(--line);border-radius:999px;padding:0 7px;white-space:nowrap}
+.hit>.node,.hit>details>summary .node{outline:2px solid var(--accent);background:var(--accent-soft)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.card{background:var(--sheet);border:1px solid var(--rule);padding:16px}
+.card h3{font:700 18px var(--f-display);margin:0 0 6px}
+.card p,.card li{font-size:15px;margin:0 0 8px}
+.card ul{padding-left:18px;margin:0}
+/* Линейка наличия метрик: год — ячейка; есть книга — залита, лакуна — пустая */
+.mt{background:var(--sheet);border:1px solid var(--rule);padding:14px 14px 10px;overflow-x:auto;margin-top:12px}
+.mt-grid{display:grid;grid-template-columns:118px repeat(108,minmax(7px,1fr));row-gap:6px;min-width:860px;font:12px var(--f-mono);color:var(--muted)}
+.mt-lab{grid-column:1;align-self:center;color:var(--ink);font:700 13px var(--f-body);padding-right:8px}
+.mt-y{height:22px;border:1px dashed var(--rule);border-left:none;background:transparent}
+.mt-y.on{background:var(--accent);border:1px solid var(--accent);border-left:none}
+.mt-y.on.k{background:var(--line);border-color:var(--line)}
+.mt-y.dec{border-left:1px solid var(--muted)}
+.mt-y.pre{border:none;border-bottom:1px solid var(--rule);height:11px;align-self:start}
+.mt-dec{font-size:11px;white-space:nowrap;align-self:end}
+.mt-ev{position:relative;height:16px}
+.mt-ev span{position:absolute;left:0;bottom:0;white-space:nowrap;font-size:11px;color:var(--ink)}
+.mt-ev span::before{content:"▼ ";color:var(--line)}
+.mt-legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font:12px var(--f-mono);color:var(--muted)}
+.mt-legend i{display:inline-block;width:14px;height:10px;margin-right:6px;vertical-align:-1px}
+footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--rule);font:13px var(--f-mono);color:var(--muted)}
+footer a{color:var(--accent)}
+@media (max-width:520px){.tools{margin-left:0}input{width:100%}}
+@media (prefers-reduced-motion:no-preference){.hit>.node,.hit>details>summary .node{transition:background .2s}}
+/* Revision table */
+.revbox{overflow-x:auto;border:1px solid var(--rule);background:var(--sheet);margin-top:12px}
+table.rev{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+table.rev th,table.rev td{border-bottom:1px solid var(--rule);padding:6px 10px;text-align:left;vertical-align:top}
+table.rev thead th{font:13px var(--f-mono);color:var(--muted);background:var(--paper);position:sticky;top:0}
+table.rev tbody th{font-weight:400;min-width:150px;position:sticky;left:0;background:var(--sheet);z-index:1}
+table.rev tbody tr.ln th{color:var(--line);font-weight:700;box-shadow:inset 4px 0 0 var(--line)}
+table.rev thead th:first-child{position:sticky;left:0;z-index:2}
+table.rev td{white-space:nowrap}
+table.rev tr.grp th{font:700 15px var(--f-display);background:var(--paper);padding-top:12px;position:static;color:var(--ink);box-shadow:none}
+table.rev tr.grp .g{position:sticky;left:10px}
+table.rev td a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-soft)}
+table.rev td a:hover{border-bottom-color:var(--accent)}
+table.rev td.empty{color:var(--rule)}
+/* Lightbox for local scan images (IMG/...) */
+.lb{position:fixed;inset:0;z-index:1000;background:#0b0d0f;display:none;overflow:auto;overscroll-behavior:contain}
+.lb.on{display:block}
+.lb .stage{min-height:100%;display:flex;align-items:center;justify-content:center;padding:56px 12px 44px}
+.lb img{max-width:100%;max-height:calc(100vh - 100px);object-fit:contain;cursor:zoom-in;background:#222;box-shadow:0 4px 30px rgba(0,0,0,.5)}
+.lb.zoom .stage{display:block;padding:56px 0 44px}
+.lb.zoom img{max-width:none;max-height:none;cursor:zoom-out;display:block;margin:0 auto}
+.lb .x{position:fixed;top:10px;right:12px;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.55);color:#fff;font:28px/1 var(--f-body);cursor:pointer;display:grid;place-items:center}
+.lb .x:hover,.lb .x:focus-visible{background:rgba(255,255,255,.18);outline:2px solid #fff;outline-offset:2px}
+.lb .cap{position:fixed;left:0;right:60px;top:0;padding:14px 16px;color:#e8eef1;font:13px/1.4 var(--f-mono);text-shadow:0 1px 2px #000}
+.lb .cap a{color:#9fd0ee;pointer-events:auto}
+.lb .hint{position:fixed;left:0;right:0;bottom:0;padding:10px 16px;color:#aab6bc;font:12px var(--f-body);text-align:center;pointer-events:none}
+.lb .load{color:#cfd8dc;font:14px var(--f-body);position:fixed;top:50%;left:0;right:0;text-align:center}
+body.lb-open{overflow:hidden}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Енотаевский уезд Астраханской губ. · ГААО · ф. 643, 176, 687, 459</div>
+  <h1>Поповы из Сасыколей</h1>
+  <p class="lede">Род однодворцев Поповых, переведённых в село Сасыколи в 1810 году из села Ерышевки Павловского уезда Воронежской губернии; место для переселения в 1809 году выбирал сам Ларион Попов. Линия прослежена от Тимофея Попова через Лариона Тимофеевича (ревизии 1811–1850), Венедикта Ларионовича и Алексея Венедиктовича 2-го (род. 1822) до Николая Алексеевича (род. 1846 — запись о рождении найдена) и, по поручителям на свадьбе, до его сына Михаила Николаевича, с 1898 года жившего в Кочковатке. По матери Стефан Михайлович происходит от сасыкольских Старцевых (Данила → Михаил → Мартын → Абрам).</p>
+  <div class="stats"><span><b>7</b>поколений</span><span><b>1811 · 1832 · 1835 · 1850 · 1858</b>ревизии и посемейный список</span><span><b>1868–1918</b>метрики Сасыколей и Кочковатки</span><span><b>≈11 000</b>сканов просмотрено</span></div>
+</header>
+
+<section>
+  <h2>Родословное дерево</h2>
+  <div class="toolbar">
+    <div class="legend">
+      <span class="pill p-line">линия Стефана</span>
+      <span class="pill p-known">по документам</span>
+      <span class="pill p-hyp">гипотеза</span>
+    </div>
+    <div class="tools">
+      <label for="q" class="meta" style="align-self:center">Поиск</label>
+      <input id="q" type="search" placeholder="имя, напр. Макар">
+      <button id="showLine" class="ln" type="button">Линия Стефана</button>
+      <button id="openAll" type="button">Развернуть всё</button>
+      <button id="closeAll" type="button">Свернуть</button>
+    </div>
+  </div>
+  <div id="trees"></div>
+</section>
+
+<section>
+  <h2>Семья по ревизиям</h2>
+  <p class="meta">Возраст «ныне на лицо» по ревизским сказкам с. Сасыколи (ГААО ф.687 оп.2). В 1835 г. в скобках — по 7-й ревизии 1816 г.; столбец 1850 — «по последней ревизии» из сказки 1858 г. Ревизия 1816 г. по Сасыколям не сохранилась; ревизия 1850 г. найдена позже (ф.687 оп.1а д.41) — её данные в карточках дерева. Клик по ячейке открывает скан.</p>
+  <div class="revbox"><table class="rev"><thead><tr><th scope="col">Лицо</th><th scope="col">1811</th><th scope="col">1835</th><th scope="col">1850</th><th scope="col">1858</th></tr></thead><tbody id="revbody"></tbody></table></div>
+</section>
+
+<section>
+  <h2>Как сделана атрибуция</h2>
+  <div class="cols">
+    <div class="card"><h3>Правило поручителей</h3><p>Записи о рождении Михаила нет: книг Сасыколей за 1869–1874 гг. нет и в самом архиве (по описи ф.643 оп.1). Его отец установлен по свадьбе 1887 г.: поручители жениха — Макарий Алексеев Попов (брат Николая Алексеевича), Иларион Стефанов Попов (двоюродный брат) и Петр Иванов Пономарев (из семьи мужа сестры Николая). Отец жениха не назван — Николай Алексеевич после 1868 г. в книгах не встречается. Его собственные родители подтверждены записью о рождении 1846 г. (ф.643 оп.1 д.151 ск.130): Алексей Венедиктов Попов и Пелагея Павлова, крёстная — тётя Марфа Венедиктовна.</p></div>
+    <div class="card"><h3>Фамилии и ревизии</h3><p>Ревизии 1811 и 1835 гг. пишут сасыкольских однодворцев по отчествам, фамилия Попов указана лишь у глав дворов; поэтому родство ветвей сведено по составу семей и возрастам. Возрасты плавают: Ларион — 44 г. в 1811 и 74 г. в 1835. В рекрутском деле 1863 г. OCR прочитал «Абрамъ Авертынова Старцевъ» — по ревизии 1858 г. это Абрам Мартынов (дата рождения 29.10.1841 совпадает).</p></div>
+    <div class="card"><h3>Выводы и допущения</h3><ul><li>Основная версия: Михаил Николаевич — сын Николая Алексеевича и Прасковьи Терентьевны (по поручителям 1887 г. и по брату Георгию).</li><li>Алексей Венедиктович 2-й родился 18 марта 1822 г., на другой день после памяти Алексия человека Божия; в записи о рождении он ошибочно назван Александром (во всех прочих документах — Алексей).</li><li>Дарья Абрамовна — дочь Абрама Мартыновича Старцева: Старцевых в Сасыколях в 1858 г. — один двор.</li><li>Пауза 1888–1897 гг. — военная служба Михаила: пара не встречается ни в одной оцифрованной метрике ГААО, брат Георгий в 1897 г. — «запасный солдат».</li></ul></div>
+  </div>
+</section>
+
+<section>
+  <h2>Какие метрики оцифрованы</h2>
+  <p class="tn">По описям ГААО в Яндекс Архиве: Покровская церковь с. Сасыколи (ф.643 оп.1) и Казанская церковь с. Кочковатка (ф.176 оп.1). Залитый год — есть книга (рождения, браки или смерти), пустой — лакуна. Для многолетних книг 1811–1859 гг. год считается закрытым по заголовку дела. Наведите на ячейку, чтобы увидеть год.</p>
+  <div class="mt"><div class="mt-grid" id="mtGrid"></div>
+  <div class="mt-legend"><span><i style="background:var(--accent)"></i>Сасыколи — книга есть</span><span><i style="background:var(--line)"></i>Кочковатка — книга есть</span><span><i style="border:1px dashed var(--muted)"></i>лакуна</span></div></div>
+</section>
+
+<footer>Источники: ГААО — ф.643 оп.1 (Покровская ц. с. Сасыколи), ф.176 оп.1 (Казанская ц. с. Кочковатка), ф.687 оп.2 и оп.1а (ревизские сказки 1811–1858), ф.454 оп.1 (посемейный список 1832 г.), ф.455 и ф.459 оп.1 (рекрутские присутствия); «Память народа» (ЦАМО). Сканы — <a href="https://yandex.ru/archive" target="_blank" rel="noopener">Яндекс Поиск по архивам</a>; локальные копии разворотов — в папке IMG. Исследование: И. Будков, 2026.</footer>
+</div>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Скан документа" hidden>
+  <div class="cap" id="lbCap"></div>
+  <button class="x" id="lbX" type="button" aria-label="Закрыть">×</button>
+  <div class="load" id="lbLoad">Загрузка скана…</div>
+  <div class="stage" id="lbStage"><img id="lbImg" alt=""></div>
+  <div class="hint">Клик по скану — полный размер / вписать в экран · Esc или × — закрыть</div>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function(){
+"use strict";
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const shifr=k=>{const s=S[k];return s.lbl||`ГААО ф.${s.f} оп.${s.op} д.${s.d} ск.${s.sc}`};   // lbl/url — источник вне Яндекс Архива
+const yurl=k=>S[k].url||`https://yandex.ru/archive/catalog/${S[k].u}/${S[k].sc}`;
+// Ссылка на источник: локальный скан (⤢, если есть) + Яндекс Архив (↗)
+function srcLinks(ks){
+  return ks.filter(k=>S[k]).map(k=>{const s=S[k];
+    return (s.img?`<a href="IMG/${s.img}" class="scan" data-k="${k}" title="Открыть скан: ${esc(shifr(k))}">${esc(s.t)} ⤢</a>`:`<a href="${yurl(k)}" target="_blank" rel="noopener" title="${esc(shifr(k))}">${esc(s.t)} ↗</a>`)
+      +(s.img?`<a href="${yurl(k)}" target="_blank" rel="noopener" title="${esc(shifr(k))} — в Яндекс Архиве">Я ↗</a>`:'');
+  }).join('');
+}
+// «Имя Отчество Фамилия (родство)» в тексте факта → имя жирным, родство плашкой
+const kinText=t=>esc(t).replace(/((?:[А-ЯЁ][а-яё]+ ){2}[А-ЯЁ][а-яё]+) \(([^()]*(?:дяд|тёт|брат|сестр|родств|родня|крестн)[^()]*)\)/g,'<b>$1</b> <span class="kinp">$2</span>');
+function plural(n){const a=n%10,b=n%100;if(a===1&&b!==11)return'ребёнок';if(a>=2&&a<=4&&(b<10||b>=20))return'ребёнка';return'детей'}
+function nodeHTML(n,kids){
+  if(n.g) return `<span class="tw" aria-hidden="true"></span><span><span class="nm">${esc(n.g)}</span></span>${n.s?`<span class="src">${srcLinks(n.s)}</span>`:''}`;
+  const p=P[n.id];
+  let h=`<span class="tw" aria-hidden="true"></span><span><span class="nm">${esc(p.n)}</span>${p.y?`<span class="yrs">${esc(p.y)}</span>`:''}</span>`;
+  const info=[];
+  if(p.line)info.push(`<span class="pill p-line">${p.target?'Стефан':'линия Стефана'}</span>`);
+  info.push(p.hyp?'<span class="pill p-hyp">гипотеза</span>':'<span class="pill p-known">по документам</span>');
+  const sp=(n.sp||[]).concat(n.ref?[n.ref]:[]);
+  if(sp.length)info.push(`<span>∞ ${sp.map(s=>`<span class="sp">${esc(P[s].n)}</span>${P[s].y?` <span class="yrs">${esc(P[s].y)}</span>`:''}`).join('; ')}</span>`);
+  if(n.ref)info.push('<span>(см. ветвь Поповых)</span>');
+  if(kids)info.push(`<span>${kids} ${plural(kids)}</span>`);
+  h+=`<span class="info">${info.join('')}</span>`;
+  if(p.note)h+=`<span class="note">${esc(p.note)}</span>`;
+  const facts=p.f.map(([y,t,ks])=>`<li><span class="fy">${esc(y)}</span>${kinText(t)}<span class="src">${srcLinks(ks)}</span></li>`).join('');
+  h+=p.f.length>2||!p.line?`<details class="refs"${p.line?' open':''}><summary>Факты и источники: ${p.f.length}</summary><ol class="facts">${facts}</ol></details>`:`<ol class="facts" style="grid-column:2">${facts}</ol>`;
+  return h;
+}
+function el(t,c,h){const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e}
+function build(n,depth){
+  const p=n.id?P[n.id]:null;
+  const li=el('li','gen-'+depth+(n.g?' grp':'')+(p&&p.line?' ln':'')+(p&&p.target?' target':''));
+  li.dataset.name=(n.g||[p.n].concat((n.sp||[]).map(s=>P[s].n)).join(' ')).toLowerCase();
+  if(n.id)li.dataset.id=n.id;
+  const kids=(n.ch||[]).length;
+  if(kids){
+    const d=el('details');d.open=depth<=3||!!(n.ch||[]).some(function f(c){return c.id&&P[c.id].line||(c.ch||[]).some(f)});
+    const s=el('summary');s.appendChild(el('span','node',nodeHTML(n,kids)));d.appendChild(s);
+    const ul=el('ul');n.ch.forEach(k=>ul.appendChild(build(k,depth+1)));d.appendChild(ul);li.appendChild(d);
+  }else{li.classList.add('leaf');li.appendChild(el('span','node',nodeHTML(n,0)))}
+  return li;
+}
+// [заголовок, корни, свёрнуто ли по умолчанию, пояснение]
+const ROOTS=[
+  ['Поповы: потомки Тимофея',[T[0].root],0],
+  ['Старцевы — семья Дарьи Абрамовны',[T[2].root],0],
+  ['Другие сасыкольские Поповы: потомки Никифора',[T[1].root],1],
+  ['Двор № 1 (1811): потомки Семёна Агаповича',[T[4].root],1,T[4].note],
+  ['Двор № 18 (1811): потомки Григория Романовича',[T[5].root],1,T[5].note],
+  ['Двор № 20 (1811): потомки Варфоломея Семёновича',[T[6].root],1,T[6].note],
+  ['Тамбовская группа (1811): потомки Максима Ивановича',[T[7].root],1,T[7].note],
+  ['Поповы, причисленные к Сасыколям в 1824–1828 годах',T[8].root.ch,1,T[8].note]
+];
+const box=document.getElementById('trees');
+ROOTS.forEach(([title,roots,closed,nt])=>{
+  box.appendChild(el('h3','tt',esc(title)));
+  const tb=el('div','treebox'),ul=el('ul','tree');
+  roots.forEach(r=>ul.appendChild(build(r,1)));
+  if(closed)ul.querySelectorAll('details').forEach((d,j)=>d.open=j===0);
+  if(nt)box.appendChild(el('p','tn',esc(nt)));
+  tb.appendChild(ul);box.appendChild(tb);
+});
+
+// ---------- Семья по ревизиям ----------
+// [лицо, line, [1811], [1835], [1850], [1858]]; ячейка — [текст, источник]
+const R=(t,k)=>[t,k];
+const ROWS=[
+ ['Двор Лариона Тимофеевича — 1811 № 12, 1835 № 119'],
+ ['Ларион Тимофеевич',1,R('44','s1811b'),R('74 (63)','s1835a'),null,null],
+ ['Венедикт Ларионович',1,R('21','s1811b'),R('45 (26)','s1835a'),R('60','s1858v'),R('68','s1858v')],
+ ['Феврония, жена Венедикта',1,null,R('48','s1835a'),null,null],
+ ['Фёдор Ларионович',0,R('19','s1811b'),R('43 (24)','s1835a'),null,null],
+ ['Елена Федосеевна, жена Фёдора',0,null,R('30','s1835a'),null,R('53, вдова','s1858v')],
+ ['Николай Ларионович',0,R('15','s1811b'),R('нет','s1835a'),null,null],
+ ['Павел Фёдорович',0,R('½','s1811b'),R('24 (3)','s1835a'),null,null],
+ ['Двор Венедикта Ларионовича — 1858 № 128 (по 9-й ревизии № 132)'],
+ ['Алексей Венедиктович 1-й',0,null,R('18','s1835a'),R('33','s1858v'),R('41','s1858v')],
+ ['Ульяна Устиновна, жена Алексея 1-го',0,null,R('20','s1835a'),null,R('43','s1858v')],
+ ['Алексей Венедиктович 2-й',1,null,R('16','s1835a'),R('31','s1858v'),R('39','s1858v')],
+ ['Пелагея Павловна, жена Алексея 2-го',1,null,null,null,R('40','s1858v')],
+ ['Николай Алексеевич',1,null,null,R('4','s1858v'),R('12','s1858v')],
+ ['Матрёна Алексеевна',0,null,null,null,R('16','s1858v')],
+ ['Макар Алексеевич',0,null,null,R('р. после','s1858v'),R('7','s1858v')],
+ ['Степан Венедиктович',0,null,R('13','s1835a'),R('28','s1858v'),R('36','s1858v')],
+ ['Домна Павловна, жена Степана',0,null,null,null,R('33','s1858v')],
+ ['Иларион Степанович',0,null,null,R('р. после','s1858v'),R('3','s1858v')],
+ ['Двор Старцевых — 1858 № 103 (по 9-й ревизии № 106)'],
+ ['Михаил Данилович Старцев',1,null,null,R('71','s1858s1'),R('† 1858','s1858s1')],
+ ['Ирина Ивановна, жена Михаила',1,null,null,null,R('† 1855','s1858s1')],
+ ['Мартын Михайлович',1,null,null,R('33','s1858s1'),R('41','s1858s1')],
+ ['Акулина Михайловна, жена Мартына',1,null,null,null,R('43','s1858s1')],
+ ['Иван Мартынович',0,null,null,R('12','s1858s2'),R('20','s1858s2')],
+ ['Абрам Мартынович',1,null,null,R('9','s1858s2'),R('17','s1858s2')],
+ ['Пётр Мартынович',0,null,null,R('4','s1858s2'),R('12','s1858s2')],
+ ['Егор Емельянович, внук Михаила',0,null,null,R('23','s1858s1'),R('31','s1858s1')]
+];
+document.getElementById('revbody').innerHTML=ROWS.map(r=>{
+  if(r.length===1)return `<tr class="grp"><th colspan="5" scope="rowgroup"><span class="g">${esc(r[0])}</span></th></tr>`;
+  return `<tr class="${r[1]?'ln':''}"><th scope="row">${esc(r[0])}</th>${r.slice(2).map(c=>{
+    if(!c)return '<td class="empty">—</td>';
+    const k=c[1],s=S[k];
+    return s.img?`<td><a href="IMG/${s.img}" class="scan" data-k="${k}" title="Открыть скан: ${esc(shifr(k))}">${esc(c[0])}</a></td>`:`<td><a href="${yurl(k)}" target="_blank" rel="noopener">${esc(c[0])}</a></td>`;
+  }).join('')}</tr>`;
+}).join('');
+
+// ---------- Просмотр скана ----------
+const lb=document.getElementById('lb'),lbImg=document.getElementById('lbImg'),lbX=document.getElementById('lbX'),lbLoad=document.getElementById('lbLoad');let lbFrom=null;
+function openLB(a){const k=a.dataset.k,s=S[k];lbFrom=a;lb.classList.remove('zoom');lbLoad.hidden=false;lbImg.style.visibility='hidden';lbImg.onload=()=>{lbLoad.hidden=true;lbImg.style.visibility=''};lbImg.onerror=()=>{lbLoad.textContent='Скан не найден: '+a.getAttribute('href')};lbLoad.textContent='Загрузка скана…';lbImg.src=a.getAttribute('href');lbImg.alt=s.t;document.getElementById('lbCap').innerHTML=`${esc(s.t)} — ${esc(shifr(k))} · <a href="${yurl(k)}" target="_blank" rel="noopener">Яндекс Архив ↗</a>`;lb.hidden=false;lb.classList.add('on');document.body.classList.add('lb-open');lbX.focus()}
+function closeLB(){lb.classList.remove('on','zoom');lb.hidden=true;document.body.classList.remove('lb-open');lbImg.removeAttribute('src');if(lbFrom)lbFrom.focus()}
+lbX.onclick=closeLB;
+document.addEventListener('click',e=>{
+  const rs=e.target.closest('details.refs>summary');if(rs){e.preventDefault();rs.parentElement.open=!rs.parentElement.open;return}
+  const sc=e.target.closest('a.scan');if(sc){e.preventDefault();e.stopPropagation();openLB(sc);return}
+  if(e.target.closest('.src a, .info, .note, ol.facts')&&e.target.closest('summary')){if(!e.target.closest('a'))e.preventDefault()}
+},true);
+lb.addEventListener('click',e=>{if(e.target.closest('.cap a'))return;if(e.target===lbImg){const r=lbImg.getBoundingClientRect(),fx=(e.clientX-r.left)/r.width,fy=(e.clientY-r.top)/r.height;lb.classList.toggle('zoom');if(lb.classList.contains('zoom')){lb.scrollLeft=lbImg.offsetWidth*fx-innerWidth/2;lb.scrollTop=lbImg.offsetTop+lbImg.offsetHeight*fy-innerHeight/2}return}if(e.target!==lbX)closeLB()});
+document.addEventListener('keydown',e=>{if(lb.classList.contains('on')&&e.key==='Escape'){e.preventDefault();closeLB()}});
+
+// ---------- Инструменты дерева ----------
+const all=()=>box.querySelectorAll('details:not(.refs)');
+document.getElementById('openAll').onclick=()=>all().forEach(d=>d.open=true);
+document.getElementById('closeAll').onclick=()=>box.querySelectorAll('ul.tree').forEach(t=>t.querySelectorAll('details:not(.refs)').forEach((d,i)=>d.open=i===0));
+const smooth=()=>matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';
+function reveal(li){let p=li.parentElement;while(p&&p!==box){if(p.tagName==='DETAILS'&&!p.classList.contains('refs'))p.open=true;p=p.parentElement}}
+document.getElementById('showLine').onclick=()=>{
+  box.querySelectorAll('li.ln').forEach(reveal);
+  const st=box.querySelector('li.target');if(st)st.scrollIntoView({block:'center',behavior:smooth()});
+};
+document.getElementById('q').addEventListener('input',e=>{
+  const q=e.target.value.trim().toLowerCase();
+  box.querySelectorAll('li').forEach(li=>li.classList.remove('hit'));
+  if(q.length<2)return;
+  let first=null;
+  box.querySelectorAll('li').forEach(li=>{if(li.dataset.name&&li.dataset.name.includes(q)){li.classList.add('hit');reveal(li);if(!first)first=li}});
+  if(first)first.scrollIntoView({block:'center',behavior:smooth()});
+});
+// ---------- Линейка наличия метрик ----------
+(function(){
+  const rng=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
+  const SAS=new Set([...rng(1811,1859),1868,...rng(1875,1881),...rng(1886,1893),...rng(1897,1903),...rng(1905,1918)]);
+  const KOC=new Set([...rng(1896,1900),1902,1903,1904,1906,1907,1910,1913,1914,1918]);
+  const EV=[[1811,'ревизия 1811',1],[1835,'ревизия 1835',1],[1858,'ревизия 1858',1],[1887,'свадьба Михаила',1],[1850,'ревизия 1850',2],[1869,'Михаил, ок. 1869',2],[1902,'Стефан',2]];
+  const Y0=1811,Y1=1918,g=document.getElementById('mtGrid');if(!g)return;
+  let h=EV.map(([y,t,r])=>`<div class="mt-ev" style="grid-column:${y-Y0+2};grid-row:${r}"><span>${esc(t)}</span></div>`).join('');
+  // до первой книги прихода ячейки не рисуются как лакуна (книги Кочковатки начинаются с 1896 г.)
+  const row=(lab,set,cls,r)=>{const f=Math.min(...set);return `<div class="mt-lab" style="grid-row:${r}">${lab}</div>`+rng(Y0,Y1).map(y=>y<f?`<div class="mt-y pre" style="grid-column:${y-Y0+2};grid-row:${r}" title="${y}: книг этого прихода ещё нет"></div>`:`<div class="mt-y${set.has(y)?' on'+cls:''}${y%10===0?' dec':''}" style="grid-column:${y-Y0+2};grid-row:${r}" title="${y}: ${set.has(y)?'книга есть':'лакуна'}"></div>`).join('')};
+  h+=row('Сасыколи',SAS,'',3)+row('Кочковатка',KOC,' k',4);
+  h+=rng(Y0,Y1).filter(y=>y%10===0).map(y=>`<div class="mt-dec" style="grid-column:${y-Y0+2}/span 10;grid-row:5">${y}</div>`).join('');
+  g.innerHTML=h;
+})();
+})();
+</script>
+</body>
+</html>
